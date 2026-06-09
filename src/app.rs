@@ -52,7 +52,7 @@ fn App() -> impl IntoView {
                     <div class="brand">
                         <img
                             class="brand-icon"
-                            src="beaver-db.svg"
+                            src="images/beave-rs-icon.png"
                             alt="A beaver gnawing a data table"
                         />
                         <div>
