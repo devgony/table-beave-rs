@@ -1,0 +1,11 @@
+{
+  // Static-assets-only Worker: serves the trunk build output in ./dist.
+  // No server code (no "main") — this is a pure client-side Leptos/WASM SPA.
+  "name": "beave-rs",
+  "compatibility_date": "2025-04-01",
+  "assets": {
+    "directory": "./dist",
+    // Serve index.html for any unmatched path (SPA refresh-safe).
+    "not_found_handling": "single-page-application"
+  }
+}
