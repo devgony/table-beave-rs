@@ -1,0 +1,45 @@
+name: Deploy
+
+# main에 push/merge 되면 자동으로 빌드 후 Cloudflare에 배포한다.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # 수동 실행도 허용
+
+permissions:
+  contents: read
+
+# 같은 브랜치의 배포가 중첩되면 이전 실행을 취소한다.
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust (wasm32 target)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Cache cargo & build artifacts
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install Trunk
+        uses: jetli/trunk-action@v0.5.0
+        with:
+          version: latest
+
+      - name: Build (trunk --release)
+        run: trunk build --release
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "4"
+          command: deploy
