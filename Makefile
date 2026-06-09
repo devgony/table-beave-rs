@@ -1,13 +1,18 @@
-.PHONY: dev build test
+.PHONY: dev build test deploy help
 
-# Start the local dev server with live reload.
-dev:
+.DEFAULT_GOAL := help
+
+dev: ## Start the local dev server with live reload
 	trunk serve
 
-# Produce an optimized production build into dist/.
-build:
+build: ## Build an optimized production bundle into dist/
 	trunk build --release
 
-# Run the parser test suite.
-test:
+test: ## Run the parser test suite
 	cargo test
+
+deploy: build ## Build, then deploy to Cloudflare (Workers static assets)
+	npx wrangler@latest deploy
+
+help: ## Show this help
+	@grep -E '^[a-zA-Z_-]+:.*## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*## "}; {printf "  \033[36m%-8s\033[0m %s\n", $$1, $$2}'
