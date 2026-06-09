@@ -10,5 +10,5 @@ fn main() {
 
 #[cfg(not(target_arch = "wasm32"))]
 fn main() {
-    println!("beave-rs is a Leptos web app. Run it with `trunk serve`.");
+    println!("table-beave-rs is a Leptos web app. Run it with `trunk serve`.");
 }

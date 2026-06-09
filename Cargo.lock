@@ -99,15 +99,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 
 [[package]]
-name = "beave-rs"
-version = "0.1.0"
-dependencies = [
- "leptos",
- "pulldown-cmark",
- "web-sys",
-]
-
-[[package]]
 name = "bitflags"
 version = "2.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1474,6 +1465,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "table-beave-rs"
+version = "0.1.0"
+dependencies = [
+ "leptos",
+ "pulldown-cmark",
+ "web-sys",
+]
+
+[[package]]
 name = "tachys"
 version = "0.2.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1671,9 +1671,9 @@ checksum = "b6c140620e7ffbb22c2dee59cafe6084a59b5ffc27a8859a5f0d494b5d52b6be"
 
 [[package]]
 name = "uuid"
-version = "1.23.2"
+version = "1.23.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d258b83ceec21034727ecee8c382cfa6c3e133699b0742c64571814fb420c9f7"
+checksum = "144d6b123cef80b301b8f72a9e2ca4370ddec21950d0a103dd22c437006d2db7"
 dependencies = [
  "getrandom",
  "js-sys",
