@@ -1,9 +1,9 @@
 <div align="center">
   <img src="images/beave-rs-icon.png" alt="A beaver gnawing a data table" width="120" />
-  <h1>Table<b>Beave</b><sub>-rs</sub></h1>
+  <h1><img src="images/wordmark.svg" alt="TableBeave-rs" height="56" /></h1>
   <p>Cute beavers gnaw your Unicode &amp; ASCII box tables into Markdown pipe tables.</p>
   <p>
-    <a href="https://table.beave.workers.dev"><strong>🔗 Live demo</strong></a> ·
+    <a href="https://table.beave.workers.dev"><strong>🔗 Live demo</strong></a>
   </p>
 </div>
 

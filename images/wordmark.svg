@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 72" role="img" aria-label="TableBeave-rs">
+  <text x="190" y="50" text-anchor="middle"
+        font-family="Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">
+    <tspan font-size="44" font-weight="600" fill="#5d665f" fill-opacity="0.55">Table</tspan>
+    <tspan dx="6" font-size="44" font-weight="700" fill="#19201c">Beave</tspan>
+    <tspan dx="2" dy="-9" font-size="15" font-weight="500" fill="#5d665f" fill-opacity="0.55" letter-spacing="0.3">-rs</tspan>
+  </text>
+</svg>
