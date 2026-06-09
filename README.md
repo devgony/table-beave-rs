@@ -9,6 +9,8 @@
 
 ---
 
+Lately, LLM outputs love to use Unicode tables — but these render badly in Markdown-like tools such as Obsidian and Notion, which is a real pain. Our cute beavers are here to fix that.
+
 Paste a **Unicode/ASCII box table** like `+---+` or `┌───┐`, and it converts into a **Markdown pipe table** (`| a | b |`) that works right away in GitHub, Notion, and Obsidian. The parser is written in Rust, compiled to WebAssembly, and **runs entirely in the browser**. There is no server.
 
 ```text
