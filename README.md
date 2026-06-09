@@ -4,7 +4,6 @@
   <p>Cute beavers gnaw your Unicode &amp; ASCII box tables into Markdown pipe tables.</p>
   <p>
     <a href="https://table.beave.workers.dev"><strong>🔗 Live demo</strong></a> ·
-    <a href="https://github.com/devgony/table-beave-rs"><strong>Source</strong></a>
   </p>
 </div>
 
@@ -33,12 +32,12 @@ Paste a **Unicode/ASCII box table** like `+---+` or `┌───┐`, and it co
 ## How parsing works — a hand-written parser, no external library
 
 > Table parsing uses **no external crate whatsoever.** The hand-written parser in `src/parser.rs` does all of it.
-> The `pulldown-cmark` dependency is **unrelated to table parsing** — it is used only to *render the generated Markdown to preview HTML*.
+> The `pulldown-cmark` dependency is **unrelated to table parsing** — it is used only to _render the generated Markdown to preview HTML_.
 
 Box tables come in many shapes (corner glyphs, line weights, delimiter types, indentation, multi-line cells), so a generic parser doesn't capture them cleanly. Instead, a small parser was written by hand that classifies and groups the input line by line. The flow:
 
 1. **Segment splitting** — `split_segments`
-   The document is split into *table blocks* (runs of consecutive table lines) and *passthrough lines* (headings, prose, blank lines — kept as-is). This way a document mixing headings and several tables converts only the tables while preserving everything else.
+   The document is split into _table blocks_ (runs of consecutive table lines) and _passthrough lines_ (headings, prose, blank lines — kept as-is). This way a document mixing headings and several tables converts only the tables while preserving everything else.
 
 2. **Line classification** — two kinds of lines, decided char by char
    - `is_horizontal_rule`: detects separator lines. Recognizes ASCII (`+ - = :`) and Unicode box-drawing characters (code points `U+2500‒U+257F`) together, requiring "a rule char + a corner/box char" to count as a separator.
@@ -91,11 +90,11 @@ src/*.rs ──(cargo, target=wasm32)──▶ .wasm
 
 ## Dependencies
 
-| Crate | Purpose | Notes |
-|---|---|---|
+| Crate                 | Purpose                                  | Notes                                           |
+| --------------------- | ---------------------------------------- | ----------------------------------------------- |
 | `pulldown-cmark` 0.13 | Render generated Markdown → preview HTML | Unrelated to table parsing. `html` feature only |
-| `leptos` 0.8 (`csr`) | Reactive UI components | `wasm32` target only |
-| `web-sys` 0.3 | Browser APIs such as the clipboard | `wasm32` target only |
+| `leptos` 0.8 (`csr`)  | Reactive UI components                   | `wasm32` target only                            |
+| `web-sys` 0.3         | Browser APIs such as the clipboard       | `wasm32` target only                            |
 
 ## Develop / Build / Deploy
 
