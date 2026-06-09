@@ -50,17 +50,17 @@ fn App() -> impl IntoView {
             <section class="workspace">
                 <header class="topbar">
                     <div class="brand">
+                        <img
+                            class="brand-icon"
+                            src="beaver-db.svg"
+                            alt="A beaver gnawing a data table"
+                        />
                         <div>
                             <h1 class="brand-title">
                                 <span class="brand-name">"Beave"</span><span class="brand-suffix">"-rs"</span>
                             </h1>
                             <p>"Cute beavers gnaw your Unicode & ASCII box tables into Markdown pipe tables."</p>
                         </div>
-                        <img
-                            class="brand-icon"
-                            src="beaver-db.svg"
-                            alt="A beaver gnawing a database table"
-                        />
                     </div>
                     <div class="status-strip">
                         <span>{move || format!("{} columns", parsed.get().column_count)}</span>
