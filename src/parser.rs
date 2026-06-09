@@ -299,6 +299,18 @@ fn escape_markdown_cell(cell: &str) -> String {
     cell.replace('|', r"\|")
 }
 
+/// Renders generated Markdown (headings + GitHub-style pipe tables) to an HTML
+/// string for the live preview. Table support is enabled explicitly.
+pub fn markdown_to_html(markdown: &str) -> String {
+    let mut options = pulldown_cmark::Options::empty();
+    options.insert(pulldown_cmark::Options::ENABLE_TABLES);
+
+    let parser = pulldown_cmark::Parser::new_ext(markdown, options);
+    let mut html = String::new();
+    pulldown_cmark::html::push_html(&mut html, parser);
+    html
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -439,5 +451,15 @@ mod tests {
         );
         assert_eq!(parsed.row_count, 4);
         assert_eq!(parsed.column_count, 2);
+    }
+
+    #[test]
+    fn renders_markdown_preview_html() {
+        let html = markdown_to_html("# Title\n\n| A | B |\n| --- | --- |\n| 1 | 2 |");
+
+        assert!(html.contains("<h1>Title</h1>"));
+        assert!(html.contains("<table>"));
+        assert!(html.contains("<th>A</th>"));
+        assert!(html.contains("<td>1</td>"));
     }
 }

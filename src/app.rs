@@ -1,6 +1,6 @@
 use leptos::prelude::*;
 
-use crate::parser::parse_ascii_table;
+use crate::parser::{markdown_to_html, parse_ascii_table};
 
 const SAMPLE_TABLE: &str = r#"# Unicode box table
 
@@ -57,7 +57,7 @@ fn App() -> impl IntoView {
                         />
                         <div>
                             <h1 class="brand-title">
-                                <span class="brand-name">"Beave"</span><span class="brand-suffix">"-rs"</span>
+                                <span class="brand-prefix">"Table"</span><span class="brand-name">"Beave"</span><span class="brand-suffix">"-rs"</span>
                             </h1>
                             <p>"Cute beavers gnaw your Unicode & ASCII box tables into Markdown pipe tables."</p>
                         </div>
@@ -132,6 +132,21 @@ fn App() -> impl IntoView {
                         </Show>
                     </section>
                 </div>
+
+                <section class="panel preview-panel">
+                    <div class="panel-heading">
+                        <h2>"Markdown Preview"</h2>
+                    </div>
+                    <Show
+                        when=move || !parsed.get().markdown.is_empty()
+                        fallback=|| view! { <p class="hint">"Rendered tables appear here."</p> }
+                    >
+                        <div
+                            class="preview"
+                            inner_html=move || markdown_to_html(&parsed.get().markdown)
+                        ></div>
+                    </Show>
+                </section>
             </section>
         </main>
     }
