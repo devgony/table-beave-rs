@@ -1,0 +1,134 @@
+use leptos::prelude::*;
+
+use crate::parser::parse_ascii_table;
+
+const SAMPLE_TABLE: &str = r#"+----------------+---------------+---------------------+
+| Animal         | Role          | Notes               |
++----------------+---------------+---------------------+
+| Box beaver     | Parser mascot | Carves boxes clean  |
+| Markdown mole  | Reviewer      | Checks pipe escapes |
++----------------+---------------+---------------------+"#;
+
+pub fn mount() {
+    mount_to_body(App);
+}
+
+#[component]
+fn App() -> impl IntoView {
+    let (input, set_input) = signal(SAMPLE_TABLE.to_string());
+    let (first_row_is_header, set_first_row_is_header) = signal(true);
+    let parsed = Memo::new(move |_| parse_ascii_table(&input.get(), first_row_is_header.get()));
+
+    let copy_output = move |_| {
+        let text = parsed.get().markdown;
+        if !text.is_empty() {
+            copy_to_clipboard(&text);
+        }
+    };
+
+    let load_sample = move |_| {
+        set_input.set(SAMPLE_TABLE.to_string());
+    };
+
+    let clear_input = move |_| {
+        set_input.set(String::new());
+    };
+
+    view! {
+        <main class="app-shell">
+            <section class="workspace">
+                <header class="topbar">
+                    <div class="brand">
+                        <div>
+                            <h1 class="brand-title">
+                                <span class="brand-name">"Beave"</span><span class="brand-suffix">"-rs"</span>
+                            </h1>
+                            <p>"Cute beavers gnaw your ASCII & Unicode box tables into Markdown pipe tables."</p>
+                        </div>
+                        <img
+                            class="brand-icon"
+                            src="beaver-db.svg"
+                            alt="A beaver gnawing a database table"
+                        />
+                    </div>
+                    <div class="status-strip">
+                        <span>{move || format!("{} columns", parsed.get().column_count)}</span>
+                        <span>{move || format!("{} data rows", parsed.get().row_count)}</span>
+                    </div>
+                </header>
+
+                <div class="tool-grid">
+                    <section class="panel">
+                        <div class="panel-heading">
+                            <h2>"ASCII Input"</h2>
+                            <div class="actions">
+                                <button type="button" on:click=load_sample>"Sample"</button>
+                                <button type="button" on:click=clear_input>"Clear"</button>
+                            </div>
+                        </div>
+
+                        <textarea
+                            class="editor"
+                            aria-label="ASCII input"
+                            spellcheck="false"
+                            prop:value=move || input.get()
+                            on:input=move |ev| set_input.set(event_target_value(&ev))
+                        ></textarea>
+
+                        <label class="option-row">
+                            <input
+                                type="checkbox"
+                                prop:checked=move || first_row_is_header.get()
+                                on:change=move |ev| {
+                                    let checked = event_target_checked(&ev);
+                                    set_first_row_is_header.set(checked);
+                                }
+                            />
+                            <span>"Use the first row as the Markdown header"</span>
+                        </label>
+                    </section>
+
+                    <section class="panel">
+                        <div class="panel-heading">
+                            <h2>"Markdown Output"</h2>
+                            <div class="actions">
+                                <button type="button" on:click=copy_output>"Copy"</button>
+                            </div>
+                        </div>
+
+                        <textarea
+                            class="editor output"
+                            aria-label="Markdown output"
+                            readonly
+                            spellcheck="false"
+                            prop:value=move || parsed.get().markdown
+                        ></textarea>
+
+                        <Show
+                            when=move || !parsed.get().warnings.is_empty()
+                            fallback=|| view! { <p class="hint">"Ready for Notion, Obsidian, and GitHub Markdown."</p> }
+                        >
+                            <ul class="warnings">
+                                {move || {
+                                    parsed
+                                        .get()
+                                        .warnings
+                                        .into_iter()
+                                        .map(|warning| view! { <li>{warning}</li> })
+                                        .collect::<Vec<_>>()
+                                }}
+                            </ul>
+                        </Show>
+                    </section>
+                </div>
+            </section>
+        </main>
+    }
+}
+
+fn copy_to_clipboard(text: &str) {
+    if let Some(window) = web_sys::window() {
+        let clipboard = window.navigator().clipboard();
+        let _ = clipboard.write_text(text);
+    }
+}
