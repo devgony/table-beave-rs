@@ -2,12 +2,23 @@ use leptos::prelude::*;
 
 use crate::parser::parse_ascii_table;
 
-const SAMPLE_TABLE: &str = r#"+----------------+---------------+---------------------+
-| Animal         | Role          | Notes               |
-+----------------+---------------+---------------------+
-| Box beaver     | Parser mascot | Carves boxes clean  |
-| Markdown mole  | Reviewer      | Checks pipe escapes |
-+----------------+---------------+---------------------+"#;
+const SAMPLE_TABLE: &str = r#"# Unicode box table
+
+┌────────────┬───────────────┐
+│ Animal     │ Role          │
+├────────────┼───────────────┤
+│ Box beaver │ Parser mascot │
+│ Data otter │ Reviewer      │
+└────────────┴───────────────┘
+
+# ASCII table
+
++------------+---------------+
+| Animal     | Role          |
++------------+---------------+
+| Box beaver | Parser mascot |
+| Data otter | Reviewer      |
++------------+---------------+"#;
 
 pub fn mount() {
     mount_to_body(App);
@@ -43,7 +54,7 @@ fn App() -> impl IntoView {
                             <h1 class="brand-title">
                                 <span class="brand-name">"Beave"</span><span class="brand-suffix">"-rs"</span>
                             </h1>
-                            <p>"Cute beavers gnaw your ASCII & Unicode box tables into Markdown pipe tables."</p>
+                            <p>"Cute beavers gnaw your Unicode & ASCII box tables into Markdown pipe tables."</p>
                         </div>
                         <img
                             class="brand-icon"
@@ -60,7 +71,7 @@ fn App() -> impl IntoView {
                 <div class="tool-grid">
                     <section class="panel">
                         <div class="panel-heading">
-                            <h2>"ASCII Input"</h2>
+                            <h2>"Unicode / ASCII Box Input"</h2>
                             <div class="actions">
                                 <button type="button" on:click=load_sample>"Sample"</button>
                                 <button type="button" on:click=clear_input>"Clear"</button>
@@ -69,7 +80,7 @@ fn App() -> impl IntoView {
 
                         <textarea
                             class="editor"
-                            aria-label="ASCII input"
+                            aria-label="Unicode or ASCII box table input"
                             spellcheck="false"
                             prop:value=move || input.get()
                             on:input=move |ev| set_input.set(event_target_value(&ev))

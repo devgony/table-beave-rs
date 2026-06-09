@@ -84,7 +84,7 @@ button:hover {
   font-weight: 500;
   color: var(--muted);
   opacity: 0.55;
-  vertical-align: super;
+  vertical-align: middle;
   letter-spacing: 0.02em;
   margin-left: 0.08em;
 }

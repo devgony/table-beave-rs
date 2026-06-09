@@ -7,28 +7,90 @@ pub struct ParsedTable {
 }
 
 pub fn parse_ascii_table(input: &str, first_row_is_header: bool) -> ParsedTable {
-    let groups = collect_row_groups(input);
+    let mut lines_out: Vec<String> = Vec::new();
     let mut warnings = Vec::new();
+    let mut total_rows = 0;
+    let mut max_columns = 0;
+    let mut table_count = 0;
 
-    if groups.is_empty() {
+    for segment in split_segments(input) {
+        match segment {
+            Segment::Passthrough(line) => lines_out.push(line),
+            Segment::Table(block) => {
+                if let Some(table) = convert_table_block(&block, first_row_is_header) {
+                    lines_out.extend(table.markdown.split('\n').map(str::to_string));
+                    total_rows += table.row_count;
+                    max_columns = max_columns.max(table.column_count);
+                    warnings.extend(table.warnings);
+                    table_count += 1;
+                }
+            }
+        }
+    }
+
+    if table_count == 0 {
         return ParsedTable {
             markdown: String::new(),
             row_count: 0,
             column_count: 0,
-            warnings: vec!["No ASCII table rows were found.".to_string()],
+            warnings: vec!["No box-table rows were found.".to_string()],
         };
+    }
+
+    ParsedTable {
+        markdown: tidy_blank_lines(lines_out),
+        row_count: total_rows,
+        column_count: max_columns,
+        warnings,
+    }
+}
+
+enum Segment {
+    /// A non-table line (markdown heading, prose, or a blank line) kept verbatim.
+    Passthrough(String),
+    /// A run of consecutive table lines (cell rows and horizontal rules).
+    Table(Vec<String>),
+}
+
+/// Splits the document into ordered table blocks and passthrough lines, so a
+/// markdown file with headings and several tables converts table-by-table while
+/// keeping the surrounding text in place.
+fn split_segments(input: &str) -> Vec<Segment> {
+    let mut segments = Vec::new();
+    let mut table = Vec::new();
+
+    for line in input.lines() {
+        let trimmed = line.trim();
+
+        if is_horizontal_rule(trimmed) || is_cell_line(trimmed) {
+            table.push(line.to_string());
+            continue;
+        }
+
+        if !table.is_empty() {
+            segments.push(Segment::Table(std::mem::take(&mut table)));
+        }
+        segments.push(Segment::Passthrough(line.trim_end().to_string()));
+    }
+
+    if !table.is_empty() {
+        segments.push(Segment::Table(table));
+    }
+
+    segments
+}
+
+fn convert_table_block(block: &[String], first_row_is_header: bool) -> Option<ParsedTable> {
+    let groups = collect_row_groups(&block.join("\n"));
+    if groups.is_empty() {
+        return None;
     }
 
     let mut rows: Vec<Vec<String>> = groups.into_iter().map(collapse_group).collect();
     rows.retain(|row| row.iter().any(|cell| !cell.trim().is_empty()));
 
     if rows.is_empty() {
-        return ParsedTable {
-            markdown: String::new(),
-            row_count: 0,
-            column_count: 0,
-            warnings: vec!["The table only contained borders or empty cells.".to_string()],
-        };
+        return None;
     }
 
     let column_count = rows.iter().map(Vec::len).max().unwrap_or(0);
@@ -36,6 +98,7 @@ pub fn parse_ascii_table(input: &str, first_row_is_header: bool) -> ParsedTable 
         row.resize(column_count, String::new());
     }
 
+    let mut warnings = Vec::new();
     let (header, body) = if first_row_is_header {
         (rows[0].clone(), rows[1..].to_vec())
     } else {
@@ -49,12 +112,36 @@ pub fn parse_ascii_table(input: &str, first_row_is_header: bool) -> ParsedTable 
         warnings.push("Only a header row was found.".to_string());
     }
 
-    ParsedTable {
+    Some(ParsedTable {
         markdown: render_markdown_table(&header, &body),
         row_count: body.len(),
         column_count,
         warnings,
+    })
+}
+
+/// Drops leading/trailing blank lines and collapses runs of blanks to one, so a
+/// single table renders with no surrounding whitespace and stacked blocks stay
+/// separated by exactly one blank line.
+fn tidy_blank_lines(lines: Vec<String>) -> String {
+    let mut cleaned: Vec<String> = Vec::new();
+
+    for line in lines {
+        if line.trim().is_empty() {
+            if cleaned.is_empty() || cleaned.last().is_some_and(|last| last.trim().is_empty()) {
+                continue;
+            }
+            cleaned.push(String::new());
+        } else {
+            cleaned.push(line);
+        }
     }
+
+    while cleaned.last().is_some_and(|last| last.trim().is_empty()) {
+        cleaned.pop();
+    }
+
+    cleaned.join("\n")
 }
 
 fn collect_row_groups(input: &str) -> Vec<Vec<String>> {
@@ -319,6 +406,38 @@ mod tests {
             "| 행성 | 분류 |\n| --- | --- |\n| ① 수성 | 암석형 |\n| ② 금성 | 암석형 |\n| ③ 지구 | 암석형 · 생명체 |\n| ④ 화성 | 암석형 |\n| ⑤ 목성 | 가스형 |\n| ⑥ 토성 | 가스형 (고리) |\n| ⑦ 천왕성 | 얼음형 |"
         );
         assert_eq!(parsed.row_count, 7);
+        assert_eq!(parsed.column_count, 2);
+    }
+
+    #[test]
+    fn converts_document_with_headings_and_two_tables() {
+        let input = "\
+# Unicode box table
+
+┌────────────┬───────────────┐
+│ Animal     │ Role          │
+├────────────┼───────────────┤
+│ Box beaver │ Parser mascot │
+│ Data otter │ Reviewer      │
+└────────────┴───────────────┘
+
+# ASCII table
+
++------------+---------------+
+| Animal     | Role          |
++------------+---------------+
+| Box beaver | Parser mascot |
+| Data otter | Reviewer      |
++------------+---------------+
+";
+
+        let parsed = parse_ascii_table(input, true);
+
+        assert_eq!(
+            parsed.markdown,
+            "# Unicode box table\n\n| Animal | Role |\n| --- | --- |\n| Box beaver | Parser mascot |\n| Data otter | Reviewer |\n\n# ASCII table\n\n| Animal | Role |\n| --- | --- |\n| Box beaver | Parser mascot |\n| Data otter | Reviewer |"
+        );
+        assert_eq!(parsed.row_count, 4);
         assert_eq!(parsed.column_count, 2);
     }
 }
