@@ -25,6 +25,7 @@ Paste a **Unicode/ASCII box table** like `+---+` or `┌───┐`, and it co
 ## Features
 
 - **Both Unicode and ASCII boxes** — `┌─┬─┐ │ ├─┼─┤ └─┴─┘` (light/heavy/double) and `+---+ | =` handled by a single parser
+- **Flattened Markdown pipe tables** — paste rows on one line, including several tables separated by a heading. Keep the outer pipes and a `|---|...|` separator matching the header width so the parser can tell row boundaries from empty cells.
 - **Whole-document conversion** — headings (`# ...`) and prose are kept verbatim; only tables are converted, table by table
 - **Multi-line cells** — cells spanning several lines are joined with `<br>`
 - **Header option** — use the first row as the header, or auto-generate `Column 1, Column 2 …` when there isn't one
@@ -40,6 +41,7 @@ Box tables come in many shapes (corner glyphs, line weights, delimiter types, in
 
 1. **Segment splitting** — `split_segments`
    The document is split into _table blocks_ (runs of consecutive table lines) and _passthrough lines_ (headings, prose, blank lines — kept as-is). This way a document mixing headings and several tables converts only the tables while preserving everything else.
+   For Markdown pipe tables, an explicit separator establishes the number of columns. The parser uses that width to recover row boundaries even when line breaks were replaced with spaces or removed. Box tables still use line-based row grouping.
 
 2. **Line classification** — two kinds of lines, decided char by char
    - `is_horizontal_rule`: detects separator lines. Recognizes ASCII (`+ - = :`) and Unicode box-drawing characters (code points `U+2500‒U+257F`) together, requiring "a rule char + a corner/box char" to count as a separator.
